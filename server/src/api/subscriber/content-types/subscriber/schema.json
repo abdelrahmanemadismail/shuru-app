@@ -28,6 +28,9 @@
     "is_verified": {
       "type": "boolean",
       "default": false
+    },
+    "jobTitle": {
+      "type": "string"
     }
   }
 }

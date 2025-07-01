@@ -31,7 +31,7 @@ export function CodeBlock({
           </span>
         </div>
         
-        <SyntaxHighlighter
+        {/* <SyntaxHighlighter
           language={language}
           style={tomorrow}
           showLineNumbers={show_line_numbers}
@@ -49,7 +49,7 @@ export function CodeBlock({
           }}
         >
           {code}
-        </SyntaxHighlighter>
+        </SyntaxHighlighter> */}
       </div>
     </div>
   );

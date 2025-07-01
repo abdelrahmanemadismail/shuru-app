@@ -764,6 +764,7 @@ export interface ApiSubscriberSubscriber extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
     is_verified: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    jobTitle: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',

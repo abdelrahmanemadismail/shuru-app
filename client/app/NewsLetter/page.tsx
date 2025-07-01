@@ -1,26 +1,58 @@
 'use client'
 import React, { useState } from 'react';
-import { Mail, User, Building, Briefcase, GraduationCap, Code, TrendingUp, CheckCircle } from 'lucide-react';
+import { Mail, User, Building, Briefcase, GraduationCap, Code, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
+import { submitToNewsletterWithJobTitle } from '@/lib/strapi-client';
 
 const NewsletterPage = () => {
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = () => {
-    if (email && jobTitle) {
-      setIsSubmitted(true);
-      setTimeout(() => setIsSubmitted(false), 3000);
+  const handleSubmit = async () => {
+    if (!email || !name || !jobTitle) {
+      setError('جميع الحقول مطلوبة');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const result = await submitToNewsletterWithJobTitle(email, name, jobTitle);
+      
+      if (result.success) {
+        setIsSubmitted(true);
+        setEmail('');
+        setName('');
+        setJobTitle('');
+        setTimeout(() => setIsSubmitted(false), 5000);
+      } else {
+        setError(result.error || 'حدث خطأ في الإرسال');
+      }
+    } catch (err) {
+      setError('حدث خطأ في الاتصال');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const jobTitleOptions = [
-    { value: '', label: 'المسمى الوظيفي' },
+    { value: '', label: 'اختر المسمى الوظيفي *' },
     { value: 'ceo', label: 'الرئيس التنفيذي' },
     { value: 'manager', label: 'مدير' },
     { value: 'developer', label: 'مطور' },
+    { value: 'designer', label: 'مصمم' },
     { value: 'student', label: 'طالب' },
     { value: 'entrepreneur', label: 'رائد أعمال' },
+    { value: 'consultant', label: 'استشاري' },
+    { value: 'analyst', label: 'محلل' },
+    { value: 'marketer', label: 'مسوق' },
+    { value: 'sales', label: 'مبيعات' },
+    { value: 'hr', label: 'موارد بشرية' },
+    { value: 'finance', label: 'مالية' },
     { value: 'other', label: 'أخرى' },
   ];
 
@@ -52,7 +84,7 @@ const NewsletterPage = () => {
                   key={index}
                   className={`
                     w-20 sm:w-24 lg:w-28 h-32 sm:h-36 lg:h-40 bg-white
-                    transform transition-all duration-300 hover:scale-105
+                    transform hover:scale-105
                     ${index === 2 ? 'scale-110 z-10 -rotate-2' : ''}
                     ${index === 1 ? 'scale-105 rotate-1' : ''}
                     ${index === 3 ? 'scale-105 -rotate-1' : ''}
@@ -177,16 +209,16 @@ const NewsletterPage = () => {
                 <div className="bg-white p-8 text-center" style={{ border: '1px solid #e5e7eb' }}>
                   <div className="relative">
                     <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-100 animate-ping"></div>
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-100"></div>
                   </div>
                   <h3 className="text-2xl font-bold text-gray-800 mb-4">تم الاشتراك بنجاح!</h3>
                   <p className="text-gray-600 leading-relaxed">شكراً لك. ستصلك أحدث النشرات قريباً في صندوق الوارد.</p>
                   
                   {/* Success decoration */}
                   <div className="mt-6 flex justify-center space-x-2">
-                    <div className="w-2 h-2 bg-green-400 animate-bounce"></div>
-                    <div className="w-2 h-2 bg-green-400 animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                    <div className="w-2 h-2 bg-green-400 animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    <div className="w-2 h-2 bg-green-400"></div>
+                    <div className="w-2 h-2 bg-green-400"></div>
+                    <div className="w-2 h-2 bg-green-400"></div>
                   </div>
                 </div>
               ) : (
@@ -204,7 +236,31 @@ const NewsletterPage = () => {
                       <p className="text-gray-600">احصل على أحدث الأخبار والتحليلات</p>
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                      <div className="mb-4 p-4 bg-red-50 border border-red-200 flex items-center space-x-3">
+                        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                        <p className="text-red-700 text-sm">{error}</p>
+                      </div>
+                    )}
+
                     <div className="space-y-6">
+                      {/* Name Input */}
+                      <div className="relative">
+                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                          <User className="w-5 h-5" />
+                        </div>
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="w-full pr-12 pl-4 py-4 border-2 border-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 text-base bg-gray-50 focus:bg-white"
+                          placeholder="الاسم الكامل *"
+                          required
+                          style={{ border: '1px solid #e5e7eb' }}
+                        />
+                      </div>
+
                       {/* Email Input */}
                       <div className="relative">
                         <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -214,7 +270,7 @@ const NewsletterPage = () => {
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full pr-12 pl-4 py-4 border-2 border-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 text-base transition-all duration-200 bg-gray-50 focus:bg-white"
+                          className="w-full pr-12 pl-4 py-4 border-2 border-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 text-base bg-gray-50 focus:bg-white"
                           placeholder="البريد الإلكتروني *"
                           required
                           style={{ border: '1px solid #e5e7eb' }}
@@ -229,7 +285,7 @@ const NewsletterPage = () => {
                         <select
                           value={jobTitle}
                           onChange={(e) => setJobTitle(e.target.value)}
-                          className="w-full pr-12 pl-10 py-4 border-2 border-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 text-base bg-gray-50 focus:bg-white appearance-none cursor-pointer transition-all duration-200"
+                          className="w-full pr-12 pl-10 py-4 border-2 border-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 text-base bg-gray-50 focus:bg-white appearance-none cursor-pointer"
                           required
                           style={{ border: '1px solid #e5e7eb' }}
                         >
@@ -249,9 +305,14 @@ const NewsletterPage = () => {
                       {/* Submit Button */}
                       <button
                         onClick={handleSubmit}
-                        className="w-full bg-black hover:bg-gray-800 text-white font-bold py-4 px-6 text-base transition-all duration-200 transform hover:scale-105 uppercase tracking-wide"
+                        disabled={isLoading}
+                        className={`w-full font-bold py-4 px-6 text-base uppercase tracking-wide
+                          ${isLoading 
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-black hover:bg-gray-800 transform hover:scale-105'
+                          } text-white`}
                       >
-                        اشترك الآن
+                        {isLoading ? 'جاري الإرسال...' : 'اشترك الآن'}
                       </button>
 
                       {/* Privacy Notice */}
